@@ -12,6 +12,7 @@ coverage/
 .DS_Store
 Thumbs.db
 .claude/
+.superpowers/
 infra/nginx/ssl/*.pem
 infra/nginx/ssl/*.crt
 infra/nginx/ssl/*.key
