@@ -23,6 +23,7 @@ export class ChessGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private logger = new Logger(ChessGateway.name);
   private jwks: jwksClient.JwksClient;
   private disconnectTimers = new Map<string, NodeJS.Timeout>();
+  private activeSockets = new Map<string, Set<string>>();
 
   constructor(
     private chess: ChessService,
@@ -41,6 +42,19 @@ export class ChessGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       client.user = await this.verifyToken(token);
       this.logger.debug(`Chess connect: ${client.user.sub}`);
+
+      const userId = client.user.sub;
+      if (!this.activeSockets.has(userId)) {
+        this.activeSockets.set(userId, new Set());
+      }
+      this.activeSockets.get(userId)!.add(client.id);
+
+      const existingTimer = this.disconnectTimers.get(userId);
+      if (existingTimer) {
+        clearTimeout(existingTimer);
+        this.disconnectTimers.delete(userId);
+        this.logger.debug(`Cleared disconnect timer for ${userId}`);
+      }
     } catch {
       client.disconnect();
     }
@@ -51,10 +65,28 @@ export class ChessGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!userId) return;
     this.logger.debug(`Chess disconnect: ${userId}`);
 
+    const sockets = this.activeSockets.get(userId);
+    if (sockets) {
+      sockets.delete(client.id);
+      if (sockets.size === 0) {
+        this.activeSockets.delete(userId);
+      }
+    }
+
+    if (this.activeSockets.has(userId) && this.activeSockets.get(userId)!.size > 0) {
+      this.logger.debug(`User ${userId} still has active sockets, skipping disconnect timer`);
+      return;
+    }
+
     const game = this.chess.getActiveGameForUser(userId);
     if (!game) return;
 
     this.server.to(game.roomId).emit('opponent_disconnected', { gracePeriodMs: DISCONNECT_GRACE_MS });
+
+    const existingTimer = this.disconnectTimers.get(userId);
+    if (existingTimer) {
+      clearTimeout(existingTimer);
+    }
 
     const timer = setTimeout(async () => {
       this.disconnectTimers.delete(userId);

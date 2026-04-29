@@ -36,6 +36,7 @@ export default function ChessRoomPage({ params }: { params: Promise<{ roomId: st
   const [gameOver, setGameOver] = useState<ChessGameOverPayload | null>(null);
   const [drawOffered, setDrawOffered] = useState(false);
   const [opponentDisconnected, setOpponentDisconnected] = useState(false);
+  const [socketDisconnected, setSocketDisconnected] = useState(false);
 
   const myColor = game ? (game.white.id === myId ? 'white' : 'black') : 'white';
   const isMyTurn = game
@@ -75,6 +76,18 @@ export default function ChessRoomPage({ params }: { params: Promise<{ roomId: st
     socket.on('opponent_disconnected', () => setOpponentDisconnected(true));
     socket.on('opponent_reconnected', () => setOpponentDisconnected(false));
 
+    const onReconnect = () => {
+      setSocketDisconnected(false);
+      socket.emit('join_room', { roomId });
+    };
+
+    const onDisconnect = () => {
+      setSocketDisconnected(true);
+    };
+
+    socket.on('reconnect', onReconnect);
+    socket.on('disconnect', onDisconnect);
+
     return () => {
       socket.off('game_started', onGameStarted);
       socket.off('move_made', onMoveMade);
@@ -83,6 +96,8 @@ export default function ChessRoomPage({ params }: { params: Promise<{ roomId: st
       socket.off('game_over');
       socket.off('opponent_disconnected');
       socket.off('opponent_reconnected');
+      socket.off('reconnect', onReconnect);
+      socket.off('disconnect', onDisconnect);
     };
   }, [token, roomId]);
 
@@ -181,6 +196,12 @@ export default function ChessRoomPage({ params }: { params: Promise<{ roomId: st
         {opponentDisconnected && !gameOver && (
           <div className="p-3 rounded text-xs" style={{ background: 'var(--warning-soft)', border: '1px solid var(--warning)', color: 'var(--warning)' }}>
             opponent disconnected. 30s to reconnect before forfeit.
+          </div>
+        )}
+
+        {socketDisconnected && !gameOver && (
+          <div className="p-3 rounded text-xs" style={{ background: 'var(--warning-soft)', border: '1px solid var(--warning)', color: 'var(--warning)' }}>
+            connection lost. reconnecting...
           </div>
         )}
 
