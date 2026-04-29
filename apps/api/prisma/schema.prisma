@@ -1,0 +1,424 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Enums ─────────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  superadmin
+  admin
+  manager
+  hr_manager
+  employee
+}
+
+enum MessageType {
+  text
+  voice
+  video
+  file
+  image
+}
+
+enum RoomType {
+  direct
+  group
+}
+
+enum WorkHistoryEventType {
+  HIRED
+  PROMOTED
+  TRANSFERRED
+  ROLE_CHANGED
+  TERMINATED
+}
+
+enum BoardMemberRole {
+  owner
+  editor
+  viewer
+}
+
+enum NotificationType {
+  TASK_ASSIGNED
+  TASK_DEADLINE_APPROACHING
+  MESSAGE_RECEIVED
+  WORK_HISTORY_UPDATED
+}
+
+// ── Core Identity ─────────────────────────────────────────────────────────────
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String   @db.VarChar(255)
+  slug      String   @unique @db.VarChar(100)
+  logoUrl   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  departments  Department[]
+  users        User[]
+  kanbanBoards KanbanBoard[]
+  newsPosts    NewsPost[]
+
+  @@map("organizations")
+}
+
+model Department {
+  id                   String  @id @default(uuid())
+  organizationId       String
+  parentDepartmentId   String?
+  name                 String  @db.VarChar(255)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  organization       Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  parentDepartment   Department?  @relation("DepartmentHierarchy", fields: [parentDepartmentId], references: [id])
+  childDepartments   Department[] @relation("DepartmentHierarchy")
+  users              User[]
+  workHistoryFrom    WorkHistory[] @relation("WorkHistoryFromDept")
+  workHistoryTo      WorkHistory[] @relation("WorkHistoryToDept")
+
+  @@index([organizationId])
+  @@map("departments")
+}
+
+model User {
+  id             String    @id @default(uuid())
+  keycloakSub    String    @unique @db.VarChar(255)
+  organizationId String
+  departmentId   String?
+  firstName      String    @db.VarChar(100)
+  lastName       String    @db.VarChar(100)
+  middleName     String?   @db.VarChar(100)
+  email          String    @unique @db.VarChar(255)
+  phone          String?   @db.VarChar(50)
+  gender         String?   @db.VarChar(20)
+  dateOfBirth    DateTime? @db.Date
+  address        Json?
+  positionName   String?   @db.VarChar(255)
+  role           UserRole  @default(employee)
+  photoUrl       String?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  department   Department?  @relation(fields: [departmentId], references: [id])
+
+  managedBy     UserManager[] @relation("UserManagers")
+  managing      UserManager[] @relation("ManagerUsers")
+  workHistory   WorkHistory[]
+  workHistoryRecorded WorkHistory[] @relation("WorkHistoryRecorder")
+
+  sentMessages      ChatMessage[]
+  chatRoomMembers   ChatRoomMember[]
+  createdRooms      ChatRoom[]
+
+  createdBoards     KanbanBoard[]
+  boardMemberships  KanbanBoardMember[]
+  cardAssignments   KanbanCardAssignee[]
+  createdCards      KanbanCard[]
+  uploadedAttachments KanbanAttachment[]
+
+  authoredNewsPosts NewsPost[]
+  notifications     Notification[]
+  microsoftToken    MicrosoftToken?
+
+  @@index([organizationId, departmentId])
+  @@index([email])
+  @@map("users")
+}
+
+model UserManager {
+  userId     String
+  managerId  String
+  isPrimary  Boolean @default(false)
+
+  user    User @relation("UserManagers", fields: [userId], references: [id], onDelete: Cascade)
+  manager User @relation("ManagerUsers", fields: [managerId], references: [id], onDelete: Cascade)
+
+  @@id([userId, managerId])
+  @@map("user_managers")
+}
+
+model WorkHistory {
+  id               String               @id @default(uuid())
+  userId           String
+  eventType        WorkHistoryEventType
+  fromDepartmentId String?
+  toDepartmentId   String?
+  fromPosition     String?              @db.VarChar(255)
+  toPosition       String?              @db.VarChar(255)
+  fromRole         UserRole?
+  toRole           UserRole?
+  effectiveDate    DateTime             @db.Date
+  notes            String?              @db.Text
+  recordedBy       String
+  createdAt        DateTime             @default(now())
+
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromDepartment Department? @relation("WorkHistoryFromDept", fields: [fromDepartmentId], references: [id])
+  toDepartment   Department? @relation("WorkHistoryToDept", fields: [toDepartmentId], references: [id])
+  recorder       User        @relation("WorkHistoryRecorder", fields: [recordedBy], references: [id])
+
+  @@index([userId, effectiveDate(sort: Desc)])
+  @@map("work_history")
+}
+
+// ── Chat ──────────────────────────────────────────────────────────────────────
+
+model ChatRoom {
+  id             String   @id @default(uuid())
+  organizationId String
+  type           RoomType
+  name           String?  @db.VarChar(255)
+  avatarUrl      String?
+  createdBy      String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  creator  User             @relation(fields: [createdBy], references: [id])
+  members  ChatRoomMember[]
+  messages ChatMessage[]
+
+  @@index([organizationId])
+  @@map("chat_rooms")
+}
+
+model ChatRoomMember {
+  roomId     String
+  userId     String
+  joinedAt   DateTime  @default(now())
+  lastReadAt DateTime?
+
+  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([roomId, userId])
+  @@map("chat_room_members")
+}
+
+model ChatMessage {
+  id              String      @id @default(uuid())
+  roomId          String
+  senderId        String
+  messageType     MessageType
+  content         String?     @db.Text
+  fileUrl         String?
+  fileName        String?     @db.VarChar(255)
+  fileSize        BigInt?
+  durationSeconds Int?
+  replyToMessageId String?
+  isDeleted       Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+  editedAt        DateTime?
+
+  room         ChatRoom     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id])
+  replyTo      ChatMessage? @relation("MessageReplies", fields: [replyToMessageId], references: [id])
+  replies      ChatMessage[] @relation("MessageReplies")
+
+  @@index([roomId, createdAt(sort: Desc)])
+  @@map("chat_messages")
+}
+
+// ── Kanban ────────────────────────────────────────────────────────────────────
+
+model KanbanBoard {
+  id             String   @id @default(uuid())
+  organizationId String
+  name           String   @db.VarChar(255)
+  description    String?  @db.Text
+  createdBy      String
+  isArchived     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization      @relation(fields: [organizationId], references: [id])
+  creator      User              @relation(fields: [createdBy], references: [id])
+  columns      KanbanColumn[]
+  members      KanbanBoardMember[]
+  labels       KanbanLabel[]
+  cards        KanbanCard[]
+
+  @@index([organizationId])
+  @@map("kanban_boards")
+}
+
+model KanbanBoardMember {
+  boardId String
+  userId  String
+  role    BoardMemberRole @default(editor)
+
+  board KanbanBoard @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([boardId, userId])
+  @@map("kanban_board_members")
+}
+
+model KanbanColumn {
+  id        String   @id @default(uuid())
+  boardId   String
+  name      String   @db.VarChar(255)
+  position  Int
+  color     String?  @db.VarChar(7)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  board KanbanBoard  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  cards KanbanCard[]
+
+  @@index([boardId, position])
+  @@map("kanban_columns")
+}
+
+model KanbanCard {
+  id          String    @id @default(uuid())
+  columnId    String
+  boardId     String
+  title       String    @db.VarChar(500)
+  description String?   @db.Text
+  position    Float
+  dueDate     DateTime?
+  createdBy   String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  column      KanbanColumn       @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  board       KanbanBoard        @relation(fields: [boardId], references: [id])
+  creator     User               @relation(fields: [createdBy], references: [id])
+  assignees   KanbanCardAssignee[]
+  labels      KanbanCardLabel[]
+  subtasks    KanbanSubtask[]
+  attachments KanbanAttachment[]
+
+  @@index([columnId, position])
+  @@index([boardId])
+  @@index([dueDate])
+  @@map("kanban_cards")
+}
+
+model KanbanCardAssignee {
+  cardId String
+  userId String
+
+  card KanbanCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  user User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([cardId, userId])
+  @@map("kanban_card_assignees")
+}
+
+model KanbanLabel {
+  id      String @id @default(uuid())
+  boardId String
+  name    String @db.VarChar(100)
+  color   String @db.VarChar(7)
+
+  board KanbanBoard      @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  cards KanbanCardLabel[]
+
+  @@map("kanban_labels")
+}
+
+model KanbanCardLabel {
+  cardId  String
+  labelId String
+
+  card  KanbanCard  @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  label KanbanLabel @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@id([cardId, labelId])
+  @@map("kanban_card_labels")
+}
+
+model KanbanSubtask {
+  id          String   @id @default(uuid())
+  cardId      String
+  title       String   @db.VarChar(500)
+  isCompleted Boolean  @default(false)
+  position    Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  card KanbanCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([cardId, position])
+  @@map("kanban_subtasks")
+}
+
+model KanbanAttachment {
+  id          String   @id @default(uuid())
+  cardId      String
+  fileUrl     String
+  fileName    String   @db.VarChar(255)
+  fileSize    BigInt
+  uploadedBy  String
+  createdAt   DateTime @default(now())
+
+  card     KanbanCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  uploader User       @relation(fields: [uploadedBy], references: [id])
+
+  @@map("kanban_attachments")
+}
+
+// ── Dashboard & Notifications ─────────────────────────────────────────────────
+
+model NewsPost {
+  id             String   @id @default(uuid())
+  organizationId String
+  authorId       String
+  title          String   @db.VarChar(500)
+  content        String   @db.Text
+  isPinned       Boolean  @default(false)
+  publishedAt    DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  author       User         @relation(fields: [authorId], references: [id])
+
+  @@index([organizationId, publishedAt(sort: Desc)])
+  @@map("news_posts")
+}
+
+model Notification {
+  id            String           @id @default(uuid())
+  userId        String
+  type          NotificationType
+  title         String           @db.VarChar(255)
+  body          String           @db.Text
+  referenceType String?          @db.VarChar(50)
+  referenceId   String?
+  isRead        Boolean          @default(false)
+  createdAt     DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt(sort: Desc)])
+  @@map("notifications")
+}
+
+// ── Microsoft Integration ─────────────────────────────────────────────────────
+
+model MicrosoftToken {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  accessToken  String   @db.Text
+  refreshToken String   @db.Text
+  expiresAt    DateTime
+  scopes       String[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("microsoft_tokens")
+}

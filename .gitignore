@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.next/
+.turbo/
+*.env
+!.env.example
+!.env.dev
+.env.local
+*.tsbuildinfo
+coverage/
+*.log
+.DS_Store
+Thumbs.db
+.claude/
+infra/nginx/ssl/*.pem
+infra/nginx/ssl/*.crt
+infra/nginx/ssl/*.key
