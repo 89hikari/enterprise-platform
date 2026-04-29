@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from 'react-oidc-context';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api-client';
-import { clsx } from 'clsx';
 import type { ChatRoom } from '@enterprise/shared';
 
 interface Props {
@@ -35,13 +34,13 @@ export function ChatSidebar({ rooms, isLoading }: Props) {
   });
 
   return (
-    <div className="w-64 border-r border-gray-200 bg-white flex flex-col h-full shrink-0">
-      <div className="p-3 border-b border-gray-100 flex items-center justify-between">
-        <span className="font-semibold text-gray-800 text-sm">Messages</span>
+    <div className="w-64 flex flex-col h-full shrink-0 border-r" style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border)' }}>
+      <div className="p-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
+        <span className="font-semibold text-sm" style={{ color: 'var(--text)' }}>messages</span>
         <Link
           href="/users"
           title="New chat"
-          className="text-gray-400 hover:text-blue-600 text-lg leading-none"
+          className="text-lg leading-none terminal-link"
         >
           +
         </Link>
@@ -49,10 +48,10 @@ export function ChatSidebar({ rooms, isLoading }: Props) {
 
       <div className="flex-1 overflow-y-auto">
         {isLoading && (
-          <div className="p-4 text-sm text-gray-400">Loading...</div>
+          <div className="p-4 text-sm" style={{ color: 'var(--text-muted)' }}>loading...</div>
         )}
         {!isLoading && rooms.length === 0 && (
-          <div className="p-4 text-sm text-gray-400 text-center">No conversations yet</div>
+          <div className="p-4 text-sm text-center" style={{ color: 'var(--text-muted)' }}>no conversations</div>
         )}
         {rooms.map((room) => {
           const isActive = pathname === `/chat/${room.id}`;
@@ -61,36 +60,41 @@ export function ChatSidebar({ rooms, isLoading }: Props) {
             <Link
               key={room.id}
               href={`/chat/${room.id}`}
-              className={clsx(
-                'flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 transition-colors',
-                isActive && 'bg-blue-50',
-              )}
+              className="flex items-center gap-3 px-3 py-2 transition-colors"
+              style={{
+                background: isActive ? 'var(--accent-soft)' : 'transparent',
+                color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
+              }}
             >
-              <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-semibold text-sm shrink-0">
+              <div
+                className="w-8 h-8 rounded flex items-center justify-center font-semibold text-sm shrink-0"
+                style={{
+                  background: isActive ? 'var(--accent-soft)' : 'var(--bg-surface)',
+                  color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
+                }}
+              >
                 {room.avatarUrl ? (
-                  <img src={room.avatarUrl} alt="" className="w-9 h-9 rounded-full object-cover" />
+                  <img src={room.avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover" />
                 ) : (
                   (room.name ?? '?')[0].toUpperCase()
                 )}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between">
-                  <span className={clsx('text-sm truncate', isActive ? 'font-semibold text-blue-700' : 'font-medium text-gray-900')}>
-                    {room.name ?? 'Chat'}
-                  </span>
+                  <span className="text-sm truncate font-medium">{room.name ?? 'chat'}</span>
                   {lastMsg && (
-                    <span className="text-xs text-gray-400 ml-1 shrink-0">
+                    <span className="text-xs ml-1 shrink-0" style={{ color: 'var(--text-muted)' }}>
                       {formatTime(lastMsg.createdAt)}
                     </span>
                   )}
                 </div>
                 {lastMsg && (
-                  <p className="text-xs text-gray-400 truncate mt-0.5">
+                  <p className="text-xs truncate mt-0.5" style={{ color: 'var(--text-muted)' }}>
                     {lastMsg.isDeleted
-                      ? 'Message deleted'
+                      ? 'deleted'
                       : lastMsg.messageType === 'text'
                         ? lastMsg.content ?? ''
-                        : `📎 ${lastMsg.messageType}`}
+                        : `[${lastMsg.messageType}]`}
                   </p>
                 )}
               </div>

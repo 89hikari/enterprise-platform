@@ -65,14 +65,14 @@ function DeptNodeRow({ node, token, onMutate, orgId }: NodeProps) {
   return (
     <div className="ml-4">
       <div className="flex items-center gap-2 py-1 group">
-        <span className="text-gray-400 text-xs">▸</span>
+        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>▸</span>
         {editingName ? (
           <>
             <input
               autoFocus
               value={nameVal}
               onChange={(e) => setNameVal(e.target.value)}
-              className="border border-gray-300 rounded px-2 py-0.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="terminal-input py-0.5 px-2"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') rename.mutate(nameVal.trim());
                 if (e.key === 'Escape') setEditingName(false);
@@ -81,14 +81,14 @@ function DeptNodeRow({ node, token, onMutate, orgId }: NodeProps) {
             <button
               onClick={() => rename.mutate(nameVal.trim())}
               disabled={!nameVal.trim() || rename.isPending}
-              className="text-xs text-blue-600 hover:text-blue-800 disabled:opacity-50"
-            >Save</button>
-            <button onClick={() => setEditingName(false)} className="text-xs text-gray-400">Cancel</button>
+              className="text-xs terminal-link"
+            >save</button>
+            <button onClick={() => setEditingName(false)} className="text-xs" style={{ color: 'var(--text-muted)' }}>cancel</button>
           </>
         ) : (
           <>
             <span
-              className="text-sm text-gray-800 cursor-pointer hover:text-blue-600"
+              className="text-sm cursor-pointer hover:opacity-70"
               onClick={() => { setNameVal(node.name); setEditingName(true); }}
             >
               {node.name}
@@ -96,18 +96,19 @@ function DeptNodeRow({ node, token, onMutate, orgId }: NodeProps) {
             <div className="hidden group-hover:flex items-center gap-2 ml-2">
               <button
                 onClick={() => setAddingChild(true)}
-                className="text-xs text-blue-500 hover:text-blue-700"
-              >+ Child</button>
+                className="text-xs terminal-link"
+              >+ child</button>
               <button
                 onClick={() => { if (confirm(`Delete "${node.name}"?`)) remove.mutate(); }}
-                className="text-xs text-red-400 hover:text-red-600"
-              >× Delete</button>
+                className="text-xs hover:opacity-70"
+                style={{ color: 'var(--danger)' }}
+              >× delete</button>
             </div>
           </>
         )}
       </div>
 
-      {error && <p className="text-xs text-red-500 ml-6 mb-1">{error}</p>}
+      {error && <p className="text-xs ml-6 mb-1" style={{ color: 'var(--danger)' }}>{error}</p>}
 
       {addingChild && (
         <div className="ml-6 flex gap-2 mb-2">
@@ -115,8 +116,8 @@ function DeptNodeRow({ node, token, onMutate, orgId }: NodeProps) {
             autoFocus
             value={childName}
             onChange={(e) => setChildName(e.target.value)}
-            placeholder="Sub-department name"
-            className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="sub-department name"
+            className="terminal-input py-0.5 px-2"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && childName.trim()) addChild.mutate(childName.trim());
               if (e.key === 'Escape') setAddingChild(false);
@@ -125,9 +126,9 @@ function DeptNodeRow({ node, token, onMutate, orgId }: NodeProps) {
           <button
             onClick={() => { if (childName.trim()) addChild.mutate(childName.trim()); }}
             disabled={!childName.trim() || addChild.isPending}
-            className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 disabled:opacity-50"
-          >Add</button>
-          <button onClick={() => setAddingChild(false)} className="text-xs text-gray-400">Cancel</button>
+            className="terminal-btn terminal-btn-primary text-xs py-0.5 px-2"
+          >add</button>
+          <button onClick={() => setAddingChild(false)} className="text-xs" style={{ color: 'var(--text-muted)' }}>cancel</button>
         </div>
       )}
 
@@ -169,14 +170,18 @@ export function DepartmentsTab({ token }: { token: string | undefined }) {
   const tree = buildTree(departments);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-6">
+    <div
+      className="p-5"
+      style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}
+    >
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Departments</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>departments</h2>
         <button
           onClick={() => setAddingRoot(true)}
-          className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700"
+          className="terminal-btn terminal-btn-primary text-xs"
         >
-          + Add department
+          <span>+</span>
+          add
         </button>
       </div>
 
@@ -186,8 +191,8 @@ export function DepartmentsTab({ token }: { token: string | undefined }) {
             autoFocus
             value={rootName}
             onChange={(e) => setRootName(e.target.value)}
-            placeholder="Department name"
-            className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="department name"
+            className="terminal-input flex-1"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && rootName.trim()) addRoot.mutate(rootName.trim());
               if (e.key === 'Escape') setAddingRoot(false);
@@ -196,15 +201,15 @@ export function DepartmentsTab({ token }: { token: string | undefined }) {
           <button
             onClick={() => { if (rootName.trim()) addRoot.mutate(rootName.trim()); }}
             disabled={!rootName.trim() || addRoot.isPending}
-            className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
-          >Add</button>
-          <button onClick={() => setAddingRoot(false)} className="text-sm text-gray-400 hover:text-gray-600 px-2">Cancel</button>
+            className="terminal-btn terminal-btn-primary text-xs"
+          >add</button>
+          <button onClick={() => setAddingRoot(false)} className="terminal-btn text-xs">cancel</button>
         </div>
       )}
-      {error && <p className="text-xs text-red-500 mb-3">{error}</p>}
+      {error && <p className="text-xs mb-3" style={{ color: 'var(--danger)' }}>{error}</p>}
 
       {tree.length === 0 && !addingRoot && (
-        <p className="text-gray-400 text-sm">No departments yet.</p>
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>no departments yet.</p>
       )}
 
       {tree.map((node) => (

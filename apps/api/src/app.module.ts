@@ -11,6 +11,7 @@ import { DepartmentsModule } from './modules/departments/departments.module';
 import { FilesModule } from './modules/files/files.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { KanbanModule } from './modules/kanban/kanban.module';
+import { ChessModule } from './modules/chess/chess.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { OutlookModule } from './modules/outlook/outlook.module';
@@ -44,6 +45,7 @@ import appConfig from './config/app.config';
     FilesModule,
     ChatModule,
     KanbanModule,
+    ChessModule,
     DashboardModule,
     NotificationsModule,
     MicrosoftModule,

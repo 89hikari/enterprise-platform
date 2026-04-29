@@ -17,8 +17,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (auth.isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-gray-500">Loading...</p>
+      <div className="flex min-h-screen items-center justify-center" style={{ background: 'var(--bg)', color: 'var(--text-secondary)' }}>
+        <p>Loading...</p>
       </div>
     );
   }
@@ -26,7 +26,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (!auth.isAuthenticated) return null;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
+    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg)' }}>
       <Sidebar />
       <main className="flex-1 overflow-auto">{children}</main>
     </div>

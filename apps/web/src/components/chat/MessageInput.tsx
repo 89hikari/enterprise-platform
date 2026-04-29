@@ -106,19 +106,19 @@ export function MessageInput({ roomId, token, onSend, onTyping }: Props) {
   };
 
   return (
-    <div className="border-t border-gray-200 bg-white px-3 py-2 shrink-0">
+    <div className="px-3 py-2 shrink-0 border-t" style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border)' }}>
       {uploading && (
-        <p className="text-xs text-blue-500 mb-1 text-center">Uploading...</p>
+        <p className="text-xs mb-1 text-center" style={{ color: 'var(--info)' }}>uploading...</p>
       )}
 
       <div className="flex items-end gap-2 relative">
-        {/* File attach */}
         <button
           onClick={() => fileInputRef.current?.click()}
           title="Attach file"
-          className="p-2 text-gray-400 hover:text-blue-600 transition-colors shrink-0"
+          className="p-2 shrink-0 transition-colors"
+          style={{ color: 'var(--text-muted)' }}
         >
-          📎
+          <span className="text-sm">▤</span>
         </button>
         <input
           ref={fileInputRef}
@@ -128,10 +128,8 @@ export function MessageInput({ roomId, token, onSend, onTyping }: Props) {
           accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip"
         />
 
-        {/* Voice */}
         <VoiceRecorder onRecorded={handleVoiceRecorded} onCancel={() => {}} />
 
-        {/* Video */}
         <div className="relative">
           {showVideo ? (
             <VideoRecorder
@@ -142,31 +140,31 @@ export function MessageInput({ roomId, token, onSend, onTyping }: Props) {
             <button
               onClick={() => setShowVideo(true)}
               title="Record video message"
-              className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
+              className="p-2 transition-colors"
+              style={{ color: 'var(--text-muted)' }}
             >
-              🎥
+              <span className="text-sm">▶</span>
             </button>
           )}
         </div>
 
-        {/* Text area */}
         <textarea
           value={text}
           onChange={handleTextChange}
           onKeyDown={handleKeyDown}
-          placeholder="Type a message… (Enter to send, Shift+Enter for new line)"
+          placeholder="type a message... (enter to send)"
           rows={1}
-          className="flex-1 resize-none rounded-2xl border border-gray-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 max-h-32"
+          className="flex-1 resize-none terminal-input max-h-32"
           style={{ overflowY: text.split('\n').length > 3 ? 'auto' : 'hidden' }}
         />
 
-        {/* Send */}
         <button
           onClick={handleSendText}
           disabled={!text.trim()}
-          className="p-2 text-blue-600 disabled:text-gray-300 hover:text-blue-800 transition-colors shrink-0"
+          className="p-2 shrink-0 transition-colors disabled:opacity-30"
+          style={{ color: 'var(--accent)' }}
         >
-          ➤
+          <span className="text-sm">▸</span>
         </button>
       </div>
     </div>

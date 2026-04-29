@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from 'react-oidc-context';
 import { useState } from 'react';
 import { oidcConfig } from '@/lib/auth';
+import { ThemeProvider } from '@/contexts/theme-context';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -16,8 +17,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <AuthProvider {...oidcConfig}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider {...oidcConfig}>
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

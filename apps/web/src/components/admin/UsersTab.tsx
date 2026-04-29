@@ -26,12 +26,12 @@ export function UsersTab({ token }: { token: string | undefined }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-users'] }),
   });
 
-  const ROLE_COLORS: Record<string, string> = {
-    superadmin: 'bg-purple-100 text-purple-700',
-    admin: 'bg-blue-100 text-blue-700',
-    manager: 'bg-green-100 text-green-700',
-    hr_manager: 'bg-yellow-100 text-yellow-700',
-    employee: 'bg-gray-100 text-gray-600',
+  const ROLE_COLORS: Record<string, { bg: string; text: string }> = {
+    superadmin: { bg: 'var(--danger-soft)', text: 'var(--danger)' },
+    admin: { bg: 'var(--info-soft)', text: 'var(--info)' },
+    manager: { bg: 'var(--success-soft)', text: 'var(--success)' },
+    hr_manager: { bg: 'var(--warning-soft)', text: 'var(--warning)' },
+    employee: { bg: 'var(--bg-surface)', text: 'var(--text-secondary)' },
   };
 
   return (
@@ -39,66 +39,76 @@ export function UsersTab({ token }: { token: string | undefined }) {
       <div className="flex items-center justify-between mb-4">
         <input
           type="search"
-          placeholder="Search name or email…"
+          placeholder="search name or email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="terminal-input w-56"
         />
         <button
           onClick={() => setShowModal(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
+          className="terminal-btn terminal-btn-primary text-sm"
         >
-          + Add User
+          <span>+</span>
+          add user
         </button>
       </div>
 
-      {isLoading && <p className="text-gray-400 text-sm">Loading…</p>}
+      {isLoading && <p className="text-sm mb-3" style={{ color: 'var(--text-muted)' }}>loading...</p>}
 
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
-            <tr>
-              <th className="px-4 py-3 text-left">Name</th>
-              <th className="px-4 py-3 text-left">Email</th>
-              <th className="px-4 py-3 text-left">Role</th>
-              <th className="px-4 py-3 text-left">Status</th>
-              <th className="px-4 py-3 text-left"></th>
+      <div className="overflow-hidden" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
+        <table className="w-full text-xs">
+          <thead>
+            <tr style={{ borderColor: 'var(--border)', color: 'var(--text-muted)', borderBottom: '1px solid var(--border)' }}>
+              <th className="px-4 py-2.5 text-left font-medium uppercase tracking-wide">name</th>
+              <th className="px-4 py-2.5 text-left font-medium uppercase tracking-wide">email</th>
+              <th className="px-4 py-2.5 text-left font-medium uppercase tracking-wide">role</th>
+              <th className="px-4 py-2.5 text-left font-medium uppercase tracking-wide">status</th>
+              <th className="px-4 py-2.5 text-left font-medium uppercase tracking-wide"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
-            {data?.data.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-50">
-                <td className="px-4 py-3">
+          <tbody>
+            {data?.data.map((user, i) => (
+              <tr key={user.id} className="hover:opacity-80 transition-opacity" style={{ borderBottom: i < (data?.data.length ?? 0) - 1 ? '1px solid var(--border)' : 'none' }}>
+                <td className="px-4 py-2.5">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xs font-bold shrink-0">
+                    <div
+                      className="w-6 h-6 rounded flex items-center justify-center text-xs font-bold shrink-0"
+                      style={{ background: 'var(--accent-soft)', color: 'var(--accent)' }}
+                    >
                       {user.firstName[0]}{user.lastName[0]}
                     </div>
-                    <span className="font-medium text-gray-900">
-                      {user.firstName} {user.lastName}
-                    </span>
+                    <span className="font-medium">{user.firstName} {user.lastName}</span>
                   </div>
                 </td>
-                <td className="px-4 py-3 text-gray-500">{user.email}</td>
-                <td className="px-4 py-3">
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ROLE_COLORS[user.role] ?? 'bg-gray-100 text-gray-600'}`}>
+                <td className="px-4 py-2.5" style={{ color: 'var(--text-secondary)' }}>{user.email}</td>
+                <td className="px-4 py-2.5">
+                  <span
+                    className="px-2 py-0.5 rounded text-xs font-medium"
+                    style={{
+                      background: ROLE_COLORS[user.role]?.bg ?? 'var(--bg-surface)',
+                      color: ROLE_COLORS[user.role]?.text ?? 'var(--text-secondary)',
+                      border: `1px solid ${ROLE_COLORS[user.role]?.text ?? 'var(--border)'}`,
+                    }}
+                  >
                     {user.role}
                   </span>
                 </td>
-                <td className="px-4 py-3">
-                  <span className={`text-xs font-medium ${user.isActive ? 'text-green-600' : 'text-gray-400'}`}>
-                    {user.isActive ? 'Active' : 'Inactive'}
+                <td className="px-4 py-2.5">
+                  <span className="text-xs font-medium" style={{ color: user.isActive ? 'var(--success)' : 'var(--text-muted)' }}>
+                    {user.isActive ? 'active' : 'inactive'}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="px-4 py-2.5 text-right">
                   {user.isActive && (
                     <button
                       onClick={() => {
                         if (confirm(`Deactivate ${user.firstName} ${user.lastName}?`))
                           deactivate.mutate(user.id);
                       }}
-                      className="text-xs text-red-400 hover:text-red-600"
+                      className="text-xs hover:opacity-70"
+                      style={{ color: 'var(--danger)' }}
                     >
-                      Deactivate
+                      deactivate
                     </button>
                   )}
                 </td>
@@ -107,7 +117,7 @@ export function UsersTab({ token }: { token: string | undefined }) {
           </tbody>
         </table>
         {data?.total === 0 && (
-          <p className="text-center text-gray-400 py-8 text-sm">No users found.</p>
+          <p className="text-center py-8 text-sm" style={{ color: 'var(--text-muted)' }}>no users found.</p>
         )}
       </div>
 

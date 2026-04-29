@@ -29,16 +29,16 @@ export default function TeamsPage() {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4">
         <div className="text-center">
-          <p className="text-5xl mb-4">🤝</p>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">Connect Microsoft Teams</h2>
-          <p className="text-sm text-gray-500 mb-6 max-w-xs">
-            Access your Teams channels and send messages without leaving the app.
+          <p className="text-3xl mb-4" style={{ color: 'var(--text-muted)' }}>⊡</p>
+          <h2 className="terminal-heading mb-2">connect microsoft teams</h2>
+          <p className="text-sm mb-6 max-w-xs" style={{ color: 'var(--text-muted)' }}>
+            access your teams channels and send messages without leaving the app.
           </p>
           <a
             href={`${apiBase}/oauth/microsoft/authorize?product=teams`}
-            className="inline-block bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+            className="terminal-btn terminal-btn-primary inline-block"
           >
-            Connect Microsoft Teams
+            connect microsoft teams
           </a>
         </div>
       </div>
@@ -47,32 +47,36 @@ export default function TeamsPage() {
 
   return (
     <div className="p-6 max-w-3xl">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Teams</h1>
+      <h1 className="terminal-heading terminal-cursor mb-6">teams</h1>
 
-      {isLoading && <p className="text-gray-400 text-sm">Loading teams…</p>}
+      {isLoading && <p className="text-sm" style={{ color: 'var(--text-muted)' }}>loading teams...</p>}
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         {teams?.map((team) => (
           <Link
             key={team.id}
             href={`/teams/${team.id}`}
-            className="flex items-center gap-4 bg-white border border-gray-200 rounded-xl p-4 hover:border-blue-300 hover:shadow-sm transition-all"
+            className="flex items-center gap-4 p-4 transition-colors"
+            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}
           >
-            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+            <div
+              className="w-10 h-10 rounded flex items-center justify-center font-bold text-sm shrink-0"
+              style={{ background: 'var(--accent-soft)', color: 'var(--accent)' }}
+            >
               {team.displayName[0].toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="font-semibold text-gray-900 text-sm">{team.displayName}</p>
+              <p className="font-semibold text-sm">{team.displayName}</p>
               {team.description && (
-                <p className="text-xs text-gray-400 truncate mt-0.5">{team.description}</p>
+                <p className="text-xs truncate mt-0.5" style={{ color: 'var(--text-muted)' }}>{team.description}</p>
               )}
             </div>
-            <span className="ml-auto text-gray-300 text-lg">›</span>
+            <span className="ml-auto text-lg" style={{ color: 'var(--text-muted)' }}>›</span>
           </Link>
         ))}
 
         {teams?.length === 0 && (
-          <p className="text-gray-400 text-sm text-center py-8">No teams found.</p>
+          <p className="text-sm text-center py-8" style={{ color: 'var(--text-muted)' }}>no teams found.</p>
         )}
       </div>
     </div>

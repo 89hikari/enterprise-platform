@@ -7,16 +7,18 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { api } from '@/lib/api-client';
 import { getNotifSocket } from '@/lib/socket-client';
+import { ThemeToggle } from './ThemeToggle';
 import { clsx } from 'clsx';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard', icon: '⊞' },
-  { href: '/users', label: 'People', icon: '👥' },
-  { href: '/departments', label: 'Departments', icon: '🏢' },
-  { href: '/chat', label: 'Chat', icon: '💬' },
-  { href: '/kanban', label: 'Kanban', icon: '📋' },
-  { href: '/outlook', label: 'Outlook', icon: '📧' },
-  { href: '/teams', label: 'Teams', icon: '🤝' },
+  { href: '/users', label: 'People', icon: '👤' },
+  { href: '/departments', label: 'Departments', icon: '▦' },
+  { href: '/chat', label: 'Chat', icon: '◈' },
+  { href: '/kanban', label: 'Kanban', icon: '▤' },
+  { href: '/chess', label: 'Chess', icon: '♟' },
+  { href: '/outlook', label: 'Outlook', icon: '✉' },
+  { href: '/teams', label: 'Teams', icon: '⊡' },
 ];
 
 export function Sidebar() {
@@ -25,7 +27,6 @@ export function Sidebar() {
   const token = auth.user?.access_token;
   const qc = useQueryClient();
 
-  // Initial count from REST
   const { data: notifCount } = useQuery<{ count: number }>({
     queryKey: ['notif-count'],
     queryFn: () => api.get('/notifications/count', token),
@@ -33,7 +34,6 @@ export function Sidebar() {
     refetchInterval: 60_000,
   });
 
-  // Real-time count updates via Socket.IO
   useEffect(() => {
     if (!token) return;
     const socket = getNotifSocket(token);
@@ -55,26 +55,31 @@ export function Sidebar() {
   }, [token, qc]);
 
   return (
-    <aside className="w-56 bg-white border-r border-gray-200 flex flex-col h-full shrink-0">
-      <div className="p-4 border-b border-gray-100">
-        <span className="font-bold text-blue-600 text-lg">
-          {process.env.NEXT_PUBLIC_APP_NAME || 'Enterprise'}
+    <aside className="w-56 flex flex-col h-full shrink-0 border-r" style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border)' }}>
+      <div className="p-3 border-b" style={{ borderColor: 'var(--border)' }}>
+        <span className="font-semibold text-sm" style={{ color: 'var(--accent)' }}>
+          ~/{process.env.NEXT_PUBLIC_APP_NAME || 'enterprise'}
         </span>
       </div>
 
-      <nav className="flex-1 px-2 py-3 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-2 py-2 space-y-0.5 overflow-y-auto">
         {NAV_ITEMS.map((item) => (
           <Link
             key={item.href}
             href={item.href}
             className={clsx(
-              'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
+              'flex items-center gap-2.5 px-2.5 py-1.5 rounded text-sm transition-colors',
               pathname.startsWith(item.href)
-                ? 'bg-blue-50 text-blue-700'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                ? 'font-medium'
+                : 'hover:opacity-80',
             )}
+            style={
+              pathname.startsWith(item.href)
+                ? { background: 'var(--accent-soft)', color: 'var(--accent)' }
+                : { color: 'var(--text-secondary)' }
+            }
           >
-            <span>{item.icon}</span>
+            <span className="text-xs w-4 text-center">{item.icon}</span>
             {item.label}
           </Link>
         ))}
@@ -85,46 +90,55 @@ export function Sidebar() {
             <Link
               href="/admin"
               className={clsx(
-                'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
-                pathname.startsWith('/admin')
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                'flex items-center gap-2.5 px-2.5 py-1.5 rounded text-sm transition-colors',
+                pathname.startsWith('/admin') ? 'font-medium' : 'hover:opacity-80',
               )}
+              style={
+                pathname.startsWith('/admin')
+                  ? { background: 'var(--accent-soft)', color: 'var(--accent)' }
+                  : { color: 'var(--text-secondary)' }
+              }
             >
-              <span>⚙️</span>
+              <span className="text-xs w-4 text-center">⚙</span>
               Admin
             </Link>
           );
         })()}
       </nav>
 
-      <div className="p-3 border-t border-gray-100">
+      <div className="p-2 border-t space-y-1" style={{ borderColor: 'var(--border)' }}>
         <Link
           href="/notifications"
-          className="flex items-center gap-2 px-2 py-2 rounded-md hover:bg-gray-50 text-sm text-gray-600 mb-1"
+          className="flex items-center gap-2 px-2.5 py-1.5 rounded text-sm transition-colors hover:opacity-80"
+          style={{ color: 'var(--text-secondary)' }}
         >
-          <span>🔔</span>
+          <span className="text-xs">◉</span>
           <span>Notifications</span>
           {(notifCount?.count ?? 0) > 0 && (
-            <span className="ml-auto bg-red-500 text-white text-xs rounded-full min-w-[1.1rem] h-[1.1rem] flex items-center justify-center px-1 font-bold">
+            <span className="ml-auto text-xs font-semibold px-1.5 py-0.5 rounded" style={{ background: 'var(--danger-soft)', color: 'var(--danger)' }}>
               {notifCount!.count > 99 ? '99+' : notifCount!.count}
             </span>
           )}
         </Link>
         <Link
           href={`/profile/${auth.user?.profile.sub}`}
-          className="flex items-center gap-2 px-2 py-2 rounded-md hover:bg-gray-50 text-sm text-gray-700"
+          className="flex items-center gap-2 px-2.5 py-1.5 rounded text-sm transition-colors hover:opacity-80"
+          style={{ color: 'var(--text)' }}
         >
-          <div className="w-7 h-7 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">
+          <div className="w-5 h-5 rounded flex items-center justify-center text-xs font-bold" style={{ background: 'var(--accent-soft)', color: 'var(--accent)' }}>
             {auth.user?.profile.given_name?.[0] ?? '?'}
           </div>
           <span className="truncate">{auth.user?.profile.given_name ?? 'Profile'}</span>
         </Link>
+        <div className="px-2.5 py-1">
+          <ThemeToggle />
+        </div>
         <button
           onClick={() => auth.signoutRedirect()}
-          className="mt-1 w-full text-left px-2 py-1.5 text-xs text-gray-400 hover:text-gray-600 rounded"
+          className="w-full text-left px-2.5 py-1.5 text-xs rounded transition-colors hover:opacity-80"
+          style={{ color: 'var(--text-muted)' }}
         >
-          Sign out
+          signout
         </button>
       </div>
     </aside>

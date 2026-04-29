@@ -34,56 +34,61 @@ export default function KanbanListPage() {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Kanban Boards</h1>
+        <h1 className="terminal-heading terminal-cursor">kanban</h1>
         <button
           onClick={() => setCreating(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
+          className="terminal-btn terminal-btn-primary text-sm"
         >
-          + New Board
+          <span>+</span>
+          new board
         </button>
       </div>
 
       {creating && (
-        <div className="mb-6 bg-white border border-gray-200 rounded-xl p-4">
-          <p className="font-medium text-gray-800 mb-3">Create board</p>
+        <div
+          className="mb-6 p-4"
+          style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}
+        >
+          <p className="font-medium text-sm mb-3">create board</p>
           <input
             autoFocus
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Board name"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-3"
+            placeholder="board name"
+            className="terminal-input w-full mb-3"
           />
           <div className="flex gap-2">
             <button
               onClick={() => createBoard.mutate({ name })}
               disabled={!name.trim() || createBoard.isPending}
-              className="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
+              className="terminal-btn terminal-btn-primary text-sm px-4 py-1.5"
             >
-              Create
+              create
             </button>
-            <button onClick={() => setCreating(false)} className="text-sm text-gray-500 hover:text-gray-700 px-3">
-              Cancel
+            <button onClick={() => setCreating(false)} className="terminal-btn text-sm px-3 py-1.5">
+              cancel
             </button>
           </div>
         </div>
       )}
 
-      {isLoading && <p className="text-gray-400">Loading...</p>}
+      {isLoading && <p className="text-sm" style={{ color: 'var(--text-muted)' }}>loading...</p>}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
         {boards.map((board) => (
           <Link
             key={board.id}
             href={`/kanban/${board.id}`}
-            className="bg-white border border-gray-200 rounded-xl p-5 hover:border-blue-300 hover:shadow-sm transition-all"
+            className="p-5 transition-colors"
+            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}
           >
-            <h3 className="font-semibold text-gray-900 mb-1">{board.name}</h3>
-            {board.description && <p className="text-sm text-gray-500 mb-2">{board.description}</p>}
-            <p className="text-xs text-gray-400">{board._count.cards} card{board._count.cards !== 1 ? 's' : ''}</p>
+            <h3 className="font-semibold text-sm mb-1">▤ {board.name}</h3>
+            {board.description && <p className="text-xs mb-2" style={{ color: 'var(--text-muted)' }}>{board.description}</p>}
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{board._count.cards} card{board._count.cards !== 1 ? 's' : ''}</p>
           </Link>
         ))}
         {!isLoading && boards.length === 0 && (
-          <p className="text-gray-400 col-span-3 text-center py-12">No boards yet. Create one!</p>
+          <p className="col-span-3 text-center py-12 text-sm" style={{ color: 'var(--text-muted)' }}>no boards yet. create one!</p>
         )}
       </div>
     </div>

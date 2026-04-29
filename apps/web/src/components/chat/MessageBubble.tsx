@@ -1,6 +1,5 @@
 'use client';
 
-import { clsx } from 'clsx';
 import type { ChatMessage } from '@enterprise/shared';
 
 interface Props {
@@ -19,12 +18,13 @@ function FileAttachment({ url, name, size }: { url: string; name: string | null;
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-2 bg-white/20 rounded-lg px-3 py-2 hover:bg-white/30 transition-colors"
+      className="flex items-center gap-2 rounded px-3 py-2 transition-colors"
+      style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}
     >
-      <span className="text-lg">📎</span>
+      <span className="text-sm">▤</span>
       <div className="min-w-0">
-        <p className="text-sm font-medium truncate max-w-48">{name ?? 'File'}</p>
-        {sizeMB && <p className="text-xs opacity-70">{sizeMB}</p>}
+        <p className="text-xs font-medium truncate max-w-48">{name ?? 'file'}</p>
+        {sizeMB && <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{sizeMB}</p>}
       </div>
     </a>
   );
@@ -33,52 +33,58 @@ function FileAttachment({ url, name, size }: { url: string; name: string | null;
 export function MessageBubble({ message, isOwn }: Props) {
   if (message.isDeleted) {
     return (
-      <div className={clsx('flex', isOwn ? 'justify-end' : 'justify-start')}>
-        <p className="text-xs text-gray-400 italic px-3 py-1">Message deleted</p>
+      <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
+        <p className="text-xs italic px-3 py-1" style={{ color: 'var(--text-muted)' }}>message deleted</p>
       </div>
     );
   }
 
   return (
-    <div className={clsx('flex mb-1', isOwn ? 'justify-end' : 'justify-start')}>
-      {/* Avatar for others */}
+    <div className={`flex mb-1 ${isOwn ? 'justify-end' : 'justify-start'}`}>
       {!isOwn && (
-        <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 shrink-0 mr-2 mt-auto">
+        <div
+          className="w-6 h-6 rounded flex items-center justify-center text-xs font-bold shrink-0 mr-2 mt-auto"
+          style={{ background: 'var(--bg-active)', color: 'var(--text-secondary)' }}
+        >
           {message.sender?.photoUrl ? (
-            <img src={message.sender.photoUrl} alt="" className="w-7 h-7 rounded-full object-cover" />
+            <img src={message.sender.photoUrl} alt="" className="w-6 h-6 rounded-full object-cover" />
           ) : (
             message.sender ? `${message.sender.firstName[0]}${message.sender.lastName[0]}` : '?'
           )}
         </div>
       )}
 
-      <div className={clsx('max-w-xs lg:max-w-md xl:max-w-lg', isOwn ? 'items-end' : 'items-start', 'flex flex-col')}>
-        {/* Sender name for group chats */}
+      <div className={`max-w-xs lg:max-w-md xl:max-w-lg ${isOwn ? 'items-end' : 'items-start'} flex flex-col`}>
         {!isOwn && message.sender && (
-          <p className="text-xs text-gray-500 mb-0.5 ml-1">
-            {message.sender.firstName} {message.sender.lastName}
+          <p className="text-xs mb-0.5 ml-1" style={{ color: 'var(--text-muted)' }}>
+            {message.sender.firstName} {message.sender.lastName[0]}.
           </p>
         )}
 
-        {/* Reply preview */}
         {message.replyTo && (
-          <div className={clsx(
-            'text-xs px-3 py-1.5 rounded-t-lg border-l-2 border-opacity-60 mb-0.5',
-            isOwn ? 'bg-blue-400 border-white text-white/90' : 'bg-gray-100 border-gray-400 text-gray-600',
-          )}>
+          <div
+            className="text-xs px-3 py-1.5 rounded-t border-l-2 mb-0.5"
+            style={{
+              background: isOwn ? 'var(--accent-soft)' : 'var(--bg-surface)',
+              borderLeftColor: 'var(--accent)',
+              color: 'var(--text-secondary)',
+            }}
+          >
             <p className="font-medium">{message.replyTo.sender?.firstName}</p>
             <p className="truncate max-w-48">{message.replyTo.content ?? `[${message.replyTo.messageType}]`}</p>
           </div>
         )}
 
-        {/* Bubble */}
-        <div className={clsx(
-          'px-3 py-2 rounded-2xl',
-          isOwn
-            ? 'bg-blue-600 text-white rounded-br-sm'
-            : 'bg-white border border-gray-200 text-gray-900 rounded-bl-sm',
-          message.replyTo && 'rounded-t-none',
-        )}>
+        <div
+          className="px-3 py-2 rounded"
+          style={{
+            background: isOwn ? 'var(--accent)' : 'var(--bg-elevated)',
+            border: isOwn ? 'none' : '1px solid var(--border)',
+            color: isOwn ? 'var(--accent-fg)' : 'var(--text)',
+            borderBottomRightRadius: isOwn ? '0' : 'var(--radius)',
+            borderBottomLeftRadius: isOwn ? 'var(--radius)' : '0',
+          }}
+        >
           {message.messageType === 'text' && (
             <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
           )}
@@ -87,17 +93,17 @@ export function MessageBubble({ message, isOwn }: Props) {
             <img
               src={message.fileUrl}
               alt={message.fileName ?? 'Image'}
-              className="max-w-64 rounded-lg cursor-pointer"
+              className="max-w-64 rounded cursor-pointer"
               onClick={() => window.open(message.fileUrl!, '_blank')}
             />
           )}
 
           {message.messageType === 'voice' && message.fileUrl && (
             <div className="flex items-center gap-2 min-w-48">
-              <span className="text-lg">🎤</span>
+              <span className="text-sm">♫</span>
               <audio controls src={message.fileUrl} className="h-8 flex-1" preload="none" />
               {message.durationSeconds && (
-                <span className="text-xs opacity-70">{message.durationSeconds}s</span>
+                <span className="text-xs" style={{ opacity: 0.7 }}>{message.durationSeconds}s</span>
               )}
             </div>
           )}
@@ -107,7 +113,7 @@ export function MessageBubble({ message, isOwn }: Props) {
               <video
                 controls
                 src={message.fileUrl}
-                className="max-w-64 rounded-lg"
+                className="max-w-64 rounded"
                 preload="metadata"
               />
             </div>
@@ -117,10 +123,7 @@ export function MessageBubble({ message, isOwn }: Props) {
             <FileAttachment url={message.fileUrl} name={message.fileName} size={message.fileSize} />
           )}
 
-          <p className={clsx(
-            'text-right mt-1 text-xs',
-            isOwn ? 'text-blue-200' : 'text-gray-400',
-          )}>
+          <p className="text-right mt-1 text-xs" style={{ opacity: 0.6 }}>
             {formatTime(message.createdAt)}
           </p>
         </div>

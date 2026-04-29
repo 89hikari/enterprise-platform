@@ -28,53 +28,55 @@ export default function OutlookMessagePage({ params }: { params: Promise<{ id: s
     enabled: !!token && !!id,
   });
 
-  if (isLoading) return <div className="p-6 text-gray-400">Loading…</div>;
-  if (!msg) return <div className="p-6 text-gray-400">Message not found.</div>;
+  if (isLoading) return <div className="p-6" style={{ color: 'var(--text-muted)' }}>loading...</div>;
+  if (!msg) return <div className="p-6" style={{ color: 'var(--text-muted)' }}>message not found.</div>;
 
   return (
     <div className="flex flex-col h-full">
-      {/* Toolbar */}
-      <div className="px-6 py-3 border-b border-gray-200 bg-white shrink-0 flex items-center gap-3">
-        <Link href="/outlook" className="text-sm text-gray-500 hover:text-gray-900">← Back</Link>
+      <div className="px-6 py-2 border-b shrink-0 flex items-center gap-3" style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border)' }}>
+        <Link href="/outlook" className="text-xs terminal-link">← back</Link>
         <div className="flex-1" />
         <Link
           href={`/outlook/compose?replyTo=${encodeURIComponent(msg.from.emailAddress.address)}&subject=${encodeURIComponent('Re: ' + (msg.subject ?? ''))}`}
-          className="text-sm text-blue-600 hover:text-blue-800"
+          className="text-xs terminal-link"
         >
-          Reply
+          reply
         </Link>
-        <a href={msg.webLink} target="_blank" rel="noreferrer" className="text-sm text-gray-400 hover:text-gray-600">
-          Open in Outlook ↗
+        <a href={msg.webLink} target="_blank" rel="noreferrer" className="text-xs terminal-link">
+          open in outlook ↗
         </a>
       </div>
 
-      {/* Message content */}
       <div className="flex-1 overflow-y-auto p-6 max-w-3xl">
-        <h1 className="text-xl font-bold text-gray-900 mb-3">{msg.subject ?? '(no subject)'}</h1>
+        <h1 className="text-lg font-bold mb-3">{msg.subject ?? '(no subject)'}</h1>
 
-        <div className="flex items-start gap-3 mb-4 pb-4 border-b border-gray-100">
-          <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm shrink-0">
+        <div className="flex items-start gap-3 mb-4 pb-4" style={{ borderBottom: '1px solid var(--border)' }}>
+          <div
+            className="w-8 h-8 rounded flex items-center justify-center font-bold text-xs shrink-0"
+            style={{ background: 'var(--accent-soft)', color: 'var(--accent)' }}
+          >
             {(msg.from.emailAddress.name || msg.from.emailAddress.address)[0].toUpperCase()}
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-900">{msg.from.emailAddress.name || msg.from.emailAddress.address}</p>
-            <p className="text-xs text-gray-400">{msg.from.emailAddress.address}</p>
-            <p className="text-xs text-gray-400 mt-0.5">
-              To: {msg.toRecipients.map((r) => r.emailAddress.address).join(', ')}
+            <p className="text-sm font-medium">{msg.from.emailAddress.name || msg.from.emailAddress.address}</p>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{msg.from.emailAddress.address}</p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+              to: {msg.toRecipients.map((r) => r.emailAddress.address).join(', ')}
             </p>
           </div>
-          <span className="ml-auto text-xs text-gray-400 shrink-0">
+          <span className="ml-auto text-xs shrink-0" style={{ color: 'var(--text-muted)' }}>
             {new Date(msg.receivedDateTime).toLocaleString()}
           </span>
         </div>
 
         {msg.body.contentType === 'html' ? (
           <div
-            className="prose prose-sm max-w-none text-gray-800"
+            className="prose prose-sm max-w-none"
+            style={{ color: 'var(--text)' }}
             dangerouslySetInnerHTML={{ __html: msg.body.content }}
           />
         ) : (
-          <pre className="text-sm text-gray-800 whitespace-pre-wrap font-sans">{msg.body.content}</pre>
+          <pre className="text-sm whitespace-pre-wrap font-mono" style={{ color: 'var(--text)' }}>{msg.body.content}</pre>
         )}
       </div>
     </div>

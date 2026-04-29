@@ -4,11 +4,8 @@ const config: Config = {
   content: ['./src/**/*.{ts,tsx}'],
   theme: {
     extend: {
-      colors: {
-        primary: {
-          DEFAULT: '#2563eb',
-          foreground: '#ffffff',
-        },
+      fontFamily: {
+        mono: ["'JetBrains Mono'", 'SF Mono', 'Fira Code', 'Cascadia Code', 'monospace'],
       },
     },
   },

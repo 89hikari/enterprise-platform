@@ -17,12 +17,16 @@ export default function DepartmentsPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Departments</h1>
-      {isLoading && <p className="text-gray-400">Loading...</p>}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <h1 className="terminal-heading terminal-cursor mb-6">departments</h1>
+      {isLoading && <p className="text-sm" style={{ color: 'var(--text-muted)' }}>loading...</p>}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
         {data?.map((dept) => (
-          <div key={dept.id} className="bg-white border border-gray-200 rounded-lg p-4">
-            <h3 className="font-medium text-gray-900">{dept.name}</h3>
+          <div
+            key={dept.id}
+            className="p-4"
+            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}
+          >
+            <h3 className="font-medium text-sm">▦ {dept.name}</h3>
           </div>
         ))}
       </div>

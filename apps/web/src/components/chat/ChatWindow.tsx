@@ -15,7 +15,6 @@ export function ChatWindow({ messages, currentUserId, onLoadMore, hasMore }: Pro
   const bottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom on new messages
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages.length]);
@@ -27,7 +26,6 @@ export function ChatWindow({ messages, currentUserId, onLoadMore, hasMore }: Pro
     }
   };
 
-  // Group consecutive messages from the same sender
   const grouped = messages.map((msg, i) => ({
     ...msg,
     showSender: i === 0 || messages[i - 1].senderId !== msg.senderId,
@@ -37,19 +35,20 @@ export function ChatWindow({ messages, currentUserId, onLoadMore, hasMore }: Pro
     <div
       ref={containerRef}
       onScroll={handleScroll}
-      className="flex-1 overflow-y-auto px-4 py-3 space-y-0.5 bg-gray-50"
+      className="flex-1 overflow-y-auto px-4 py-3 space-y-0.5"
+      style={{ background: 'var(--bg)' }}
     >
       {hasMore && (
         <div className="text-center py-2">
-          <button onClick={onLoadMore} className="text-xs text-blue-500 hover:underline">
-            Load older messages
+          <button onClick={onLoadMore} className="text-xs terminal-link">
+            load older messages
           </button>
         </div>
       )}
 
       {messages.length === 0 && (
-        <div className="flex items-center justify-center h-full text-gray-400 text-sm">
-          No messages yet. Say hello! 👋
+        <div className="flex items-center justify-center h-full text-sm" style={{ color: 'var(--text-muted)' }}>
+          no messages yet. say hello!
         </div>
       )}
 

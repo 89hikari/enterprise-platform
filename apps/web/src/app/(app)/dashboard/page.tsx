@@ -4,7 +4,6 @@ import { useAuth } from 'react-oidc-context';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api-client';
 import Link from 'next/link';
-import { clsx } from 'clsx';
 import type { NewsPost, KanbanCard } from '@enterprise/shared';
 
 interface DashboardData {
@@ -26,39 +25,47 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div className="p-6 flex items-center justify-center h-full">
-        <div className="text-gray-400">Loading dashboard…</div>
+        <div className="terminal-cursor" style={{ color: 'var(--text-muted)' }}>loading dashboard</div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-8 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+    <div className="p-6 space-y-6 max-w-5xl mx-auto">
+      <h1 className="terminal-heading terminal-cursor">dashboard</h1>
 
-      {/* Company News */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-700 mb-4">Company News</h2>
+        <h2 className="text-sm font-semibold mb-3 terminal-prompt" style={{ color: 'var(--text-secondary)' }}>
+          company news
+        </h2>
         {(data?.news.length ?? 0) === 0 && (
-          <p className="text-gray-400 text-sm">No news yet.</p>
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>no news yet.</p>
         )}
-        <div className="space-y-3">
+        <div className="space-y-2">
           {data?.news.map((post) => (
-            <div key={post.id} className="bg-white rounded-xl border border-gray-200 p-4 hover:border-blue-200 transition-colors">
+            <div
+              key={post.id}
+              className="p-4 transition-colors"
+              style={{
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius)',
+              }}
+            >
               {post.isPinned && (
-                <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded mb-2 inline-block">
-                  Pinned
+                <span className="text-xs font-medium px-1.5 py-0.5 rounded mb-2 inline-block" style={{ background: 'var(--info-soft)', color: 'var(--info)', border: '1px solid var(--info)' }}>
+                  pinned
                 </span>
               )}
-              <h3 className="font-semibold text-gray-900">{post.title}</h3>
-              <p className="text-sm text-gray-500 mt-1 line-clamp-2">{post.content}</p>
+              <h3 className="font-medium text-sm">{post.title}</h3>
+              <p className="text-xs mt-1 line-clamp-2" style={{ color: 'var(--text-muted)' }}>{post.content}</p>
               <div className="flex items-center gap-2 mt-2">
                 {post.author && (
-                  <span className="text-xs text-gray-400">
-                    {(post.author as any).firstName} {(post.author as any).lastName}
+                  <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                    {(post.author as any).firstName} {(post.author as any).lastName[0]}.
                   </span>
                 )}
-                <span className="text-xs text-gray-300">·</span>
-                <span className="text-xs text-gray-400">
+                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
                   {new Date(post.publishedAt).toLocaleDateString()}
                 </span>
               </div>
@@ -67,26 +74,32 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Assigned Tasks */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-700 mb-4">My Tasks</h2>
+        <h2 className="text-sm font-semibold mb-3 terminal-prompt" style={{ color: 'var(--text-secondary)' }}>
+          my tasks
+        </h2>
         {(data?.assigned.length ?? 0) === 0 && (
-          <p className="text-gray-400 text-sm">No tasks assigned to you.</p>
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>no tasks assigned.</p>
         )}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {data?.assigned.map((card) => (
             <Link
               key={card.id}
               href={`/kanban/${card.boardId}`}
-              className="bg-white rounded-xl border border-gray-200 p-4 hover:border-blue-300 hover:shadow-sm transition-all block"
+              className="p-4 block transition-colors"
+              style={{
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius)',
+              }}
             >
-              <h3 className="font-medium text-gray-900 text-sm leading-snug">{card.title}</h3>
+              <h3 className="font-medium text-sm leading-snug">{card.title}</h3>
               {card.dueDate && (
-                <p className={clsx(
-                  'text-xs mt-1.5',
-                  new Date(card.dueDate) < new Date() ? 'text-red-500' : 'text-gray-400',
-                )}>
-                  Due {new Date(card.dueDate).toLocaleDateString()}
+                <p
+                  className="text-xs mt-1.5"
+                  style={{ color: new Date(card.dueDate) < new Date() ? 'var(--danger)' : 'var(--text-muted)' }}
+                >
+                  due {new Date(card.dueDate).toLocaleDateString()}
                 </p>
               )}
             </Link>
@@ -94,20 +107,26 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Upcoming Deadlines */}
       {(data?.upcoming.length ?? 0) > 0 && (
         <section>
-          <h2 className="text-lg font-semibold text-yellow-700 mb-4">Upcoming Deadlines</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <h2 className="text-sm font-semibold mb-3" style={{ color: 'var(--warning)' }}>
+            upcoming deadlines
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {data?.upcoming.map((card) => (
               <Link
                 key={card.id}
                 href={`/kanban/${card.boardId}`}
-                className="bg-yellow-50 rounded-xl border border-yellow-200 p-4 hover:border-yellow-400 transition-colors block"
+                className="p-4 block transition-colors"
+                style={{
+                  background: 'var(--warning-soft)',
+                  border: '1px solid var(--warning)',
+                  borderRadius: 'var(--radius)',
+                }}
               >
-                <h3 className="font-medium text-gray-900 text-sm leading-snug">{card.title}</h3>
-                <p className="text-xs text-yellow-700 mt-1.5">
-                  Due {new Date(card.dueDate!).toLocaleDateString()}
+                <h3 className="font-medium text-sm leading-snug">{card.title}</h3>
+                <p className="text-xs mt-1.5" style={{ color: 'var(--warning)' }}>
+                  due {new Date(card.dueDate!).toLocaleDateString()}
                 </p>
               </Link>
             ))}

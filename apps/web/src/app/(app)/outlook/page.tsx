@@ -4,7 +4,6 @@ import { useAuth } from 'react-oidc-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api-client';
 import Link from 'next/link';
-import { clsx } from 'clsx';
 
 interface MailMessage {
   id: string;
@@ -47,16 +46,16 @@ export default function OutlookPage() {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4">
         <div className="text-center">
-          <p className="text-5xl mb-4">📧</p>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">Connect your Outlook</h2>
-          <p className="text-sm text-gray-500 mb-6 max-w-xs">
-            Connect your Microsoft account to read and send emails directly from this app.
+          <p className="text-3xl mb-4" style={{ color: 'var(--text-muted)' }}>✉</p>
+          <h2 className="terminal-heading mb-2">connect your outlook</h2>
+          <p className="text-sm mb-6 max-w-xs" style={{ color: 'var(--text-muted)' }}>
+            connect your microsoft account to read and send emails directly from this app.
           </p>
           <a
             href={`${apiBase}/oauth/microsoft/authorize?product=outlook`}
-            className="inline-block bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+            className="terminal-btn terminal-btn-primary inline-block"
           >
-            Connect Microsoft Account
+            connect microsoft account
           </a>
         </div>
       </div>
@@ -65,52 +64,52 @@ export default function OutlookPage() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-200 bg-white shrink-0 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-900">Inbox</h1>
+      <div className="px-6 py-3 border-b shrink-0 flex items-center justify-between" style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border)' }}>
+        <h1 className="terminal-heading text-base">inbox</h1>
         <Link
           href="/outlook/compose"
-          className="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+          className="terminal-btn terminal-btn-primary text-xs"
         >
-          + Compose
+          <span>+</span>
+          compose
         </Link>
       </div>
 
-      {/* Message list */}
       <div className="flex-1 overflow-y-auto">
         {isLoading && (
-          <div className="p-6 text-sm text-gray-400">Loading messages…</div>
+          <div className="p-6 text-sm" style={{ color: 'var(--text-muted)' }}>loading messages...</div>
         )}
         {messages?.value.map((msg) => (
           <Link
             key={msg.id}
             href={`/outlook/${msg.id}`}
             onClick={() => !msg.isRead && markRead.mutate(msg.id)}
-            className={clsx(
-              'flex items-start gap-4 px-6 py-3.5 border-b border-gray-100 hover:bg-gray-50 transition-colors',
-              !msg.isRead && 'bg-blue-50',
-            )}
+            className="flex items-start gap-4 px-6 py-3 border-b transition-colors"
+            style={{
+              background: !msg.isRead ? 'var(--info-soft)' : 'transparent',
+              borderColor: 'var(--border)',
+            }}
           >
-            <div className={clsx('w-2 h-2 rounded-full mt-2 shrink-0', msg.isRead ? 'bg-transparent' : 'bg-blue-500')} />
+            <div className="w-1.5 h-1.5 rounded mt-2 shrink-0" style={{ background: msg.isRead ? 'transparent' : 'var(--info)' }} />
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-2">
-                <span className={clsx('text-sm truncate', !msg.isRead ? 'font-semibold text-gray-900' : 'text-gray-700')}>
+                <span className="text-sm truncate" style={{ fontWeight: !msg.isRead ? 600 : 400 }}>
                   {msg.from.emailAddress.name || msg.from.emailAddress.address}
                 </span>
-                <span className="text-xs text-gray-400 shrink-0">
+                <span className="text-xs shrink-0" style={{ color: 'var(--text-muted)' }}>
                   {new Date(msg.receivedDateTime).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                 </span>
               </div>
-              <p className={clsx('text-sm truncate', !msg.isRead ? 'font-medium text-gray-800' : 'text-gray-600')}>
+              <p className="text-sm truncate" style={{ fontWeight: !msg.isRead ? 500 : 400 }}>
                 {msg.subject ?? '(no subject)'}
               </p>
-              <p className="text-xs text-gray-400 truncate mt-0.5">{msg.bodyPreview}</p>
+              <p className="text-xs truncate mt-0.5" style={{ color: 'var(--text-muted)' }}>{msg.bodyPreview}</p>
             </div>
-            {msg.hasAttachments && <span className="text-xs text-gray-400 shrink-0 mt-1">📎</span>}
+            {msg.hasAttachments && <span className="text-xs shrink-0 mt-1" style={{ color: 'var(--text-muted)' }}>▤</span>}
           </Link>
         ))}
         {messages?.value.length === 0 && (
-          <div className="p-8 text-center text-gray-400 text-sm">Your inbox is empty.</div>
+          <div className="p-8 text-center text-sm" style={{ color: 'var(--text-muted)' }}>inbox is empty.</div>
         )}
       </div>
     </div>

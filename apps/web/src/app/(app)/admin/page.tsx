@@ -18,28 +18,28 @@ export default function AdminPage() {
 
   if (!isAdmin) {
     return (
-      <div className="p-6 text-gray-400">
-        You do not have permission to access this page.
+      <div className="p-6" style={{ color: 'var(--text-muted)' }}>
+        access denied. insufficient permissions.
       </div>
     );
   }
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Admin</h1>
+      <h1 className="terminal-heading terminal-cursor mb-6">admin</h1>
 
-      <div className="flex gap-1 border-b border-gray-200 mb-6">
+      <div className="flex gap-0 mb-6 border-b" style={{ borderColor: 'var(--border)' }}>
         {TABS.map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-4 py-2 text-sm font-medium rounded-t-md transition-colors ${
-              tab === t
-                ? 'bg-white border border-b-white border-gray-200 text-blue-700 -mb-px'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
+            className="px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px"
+            style={{
+              borderColor: tab === t ? 'var(--accent)' : 'transparent',
+              color: tab === t ? 'var(--accent)' : 'var(--text-muted)',
+            }}
           >
-            {t}
+            {t.toLowerCase()}
           </button>
         ))}
       </div>
