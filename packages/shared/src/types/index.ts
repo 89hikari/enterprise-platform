@@ -281,3 +281,76 @@ export interface SocketCardUpdatedPayload {
   cardId: string;
   changes: Partial<KanbanCard>;
 }
+
+// ── Chess ─────────────────────────────────────────────────────────────────────
+
+export type ChessRoomStatus = 'WAITING' | 'ACTIVE' | 'FINISHED';
+export type ChessResult = 'WHITE_WIN' | 'BLACK_WIN' | 'DRAW';
+export type ChessEndReason =
+  | 'CHECKMATE'
+  | 'STALEMATE'
+  | 'TIMEOUT'
+  | 'RESIGN'
+  | 'DRAW_AGREEMENT'
+  | 'DISCONNECT'
+  | 'INSUFFICIENT_MATERIAL'
+  | 'THREEFOLD_REPETITION'
+  | 'FIFTY_MOVE_RULE';
+
+export interface ChessUserSummary {
+  id: string;
+  firstName: string;
+  lastName: string;
+  photoUrl: string | null;
+}
+
+export interface ChessRoomSummary {
+  id: string;
+  name: string;
+  creator: ChessUserSummary;
+  status: ChessRoomStatus;
+  timeControl: number | null;
+  white: ChessUserSummary | null;
+  black: ChessUserSummary | null;
+}
+
+export interface ChessPlayerRank {
+  rank: number;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  photoUrl: string | null;
+  elo: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  gamesPlayed: number;
+}
+
+export interface ChessGameStartedPayload {
+  roomId: string;
+  fen: string;
+  white: ChessUserSummary;
+  black: ChessUserSummary;
+  timeControl: number | null;
+  whiteTimeMs: number;
+  blackTimeMs: number;
+  turn: 'w' | 'b';
+}
+
+export interface ChessMoveMadePayload {
+  fen: string;
+  move: { from: string; to: string; san: string };
+  turn: 'w' | 'b';
+  whiteTimeMs: number;
+  blackTimeMs: number;
+}
+
+export interface ChessGameOverPayload {
+  result: ChessResult;
+  reason: ChessEndReason;
+  whiteElo: number;
+  blackElo: number;
+  whiteEloChange: number;
+  blackEloChange: number;
+}
