@@ -2,15 +2,15 @@ import { IsString, IsOptional, Length } from 'class-validator';
 
 export class MakeMoveDto {
   @IsString()
-  roomId: string;
+  roomId!: string;
 
   @IsString()
   @Length(2, 2)
-  from: string;
+  from!: string;
 
   @IsString()
   @Length(2, 2)
-  to: string;
+  to!: string;
 
   @IsOptional()
   @IsString()
