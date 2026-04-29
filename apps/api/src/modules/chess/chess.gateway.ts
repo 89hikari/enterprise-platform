@@ -36,6 +36,11 @@ export class ChessGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
 
+  async broadcastRoomList() {
+    const rooms = await this.chess.getRooms();
+    this.server.emit('room_list', rooms);
+  }
+
   async handleConnection(client: AuthSocket) {
     const token = client.handshake.auth?.token as string | undefined;
     if (!token) { client.disconnect(); return; }
@@ -94,8 +99,7 @@ export class ChessGateway implements OnGatewayConnection, OnGatewayDisconnect {
       try {
         const gameOver = await this.chess.endGame(game.roomId, result as any, 'DISCONNECT');
         this.server.to(game.roomId).emit('game_over', gameOver);
-        const rooms = await this.chess.getRooms();
-        this.server.emit('room_list', rooms);
+        await this.broadcastRoomList();
       } catch (e) {
         this.logger.error('Error ending game on disconnect', e);
       }
@@ -116,8 +120,7 @@ export class ChessGateway implements OnGatewayConnection, OnGatewayDisconnect {
         client.user.sub,
       );
       await client.join(room.id);
-      const rooms = await this.chess.getRooms();
-      this.server.emit('room_list', rooms);
+      await this.broadcastRoomList();
       return { event: 'room_created', room };
     } catch (e: any) {
       throw new WsException(e.message ?? 'Failed to create room');
@@ -157,8 +160,7 @@ export class ChessGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const gamePayload = await this.chess.startGame(roomId, userId);
       await client.join(roomId);
       this.server.to(roomId).emit('game_started', gamePayload);
-      const rooms = await this.chess.getRooms();
-      this.server.emit('room_list', rooms);
+      await this.broadcastRoomList();
     } catch (e: any) {
       throw new WsException(e.message ?? 'Cannot join room');
     }
@@ -172,8 +174,7 @@ export class ChessGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       await this.chess.cancelRoom(payload.roomId, client.user.sub);
       client.leave(payload.roomId);
-      const rooms = await this.chess.getRooms();
-      this.server.emit('room_list', rooms);
+      await this.broadcastRoomList();
     } catch (e: any) {
       throw new WsException(e.message ?? 'Cannot cancel room');
     }
@@ -201,8 +202,7 @@ export class ChessGateway implements OnGatewayConnection, OnGatewayDisconnect {
       try {
         const gameOver = await this.chess.endGame(payload.roomId, result.result, 'TIMEOUT');
         this.server.to(payload.roomId).emit('game_over', gameOver);
-        const rooms = await this.chess.getRooms();
-        this.server.emit('room_list', rooms);
+        await this.broadcastRoomList();
       } catch (e) {
         this.logger.error('Error ending game on timeout', e);
       }
@@ -215,8 +215,7 @@ export class ChessGateway implements OnGatewayConnection, OnGatewayDisconnect {
       try {
         const gameOver = await this.chess.endGame(payload.roomId, result.gameOver.result, result.gameOver.reason);
         this.server.to(payload.roomId).emit('game_over', gameOver);
-        const rooms = await this.chess.getRooms();
-        this.server.emit('room_list', rooms);
+        await this.broadcastRoomList();
       } catch (e) {
         this.logger.error('Error ending game', e);
       }
@@ -248,8 +247,7 @@ export class ChessGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const gameOver = await this.chess.endGame(payload.roomId, 'DRAW', 'DRAW_AGREEMENT');
       this.server.to(payload.roomId).emit('game_over', gameOver);
-      const rooms = await this.chess.getRooms();
-      this.server.emit('room_list', rooms);
+      await this.broadcastRoomList();
     } catch (e: any) {
       throw new WsException(e.message ?? 'Failed to end game');
     }
@@ -266,8 +264,7 @@ export class ChessGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const gameOver = await this.chess.endGame(payload.roomId, result as any, 'RESIGN');
       this.server.to(payload.roomId).emit('game_over', gameOver);
-      const rooms = await this.chess.getRooms();
-      this.server.emit('room_list', rooms);
+      await this.broadcastRoomList();
     } catch (e: any) {
       throw new WsException(e.message ?? 'Failed to resign');
     }
