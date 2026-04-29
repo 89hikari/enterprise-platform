@@ -130,6 +130,13 @@ model User {
   notifications     Notification[]
   microsoftToken    MicrosoftToken?
 
+  chessRoomsCreated   ChessRoom[]    @relation("chess_room_creator")
+  chessRoomsAsWhite   ChessRoom[]    @relation("chess_white")
+  chessRoomsAsBlack   ChessRoom[]    @relation("chess_black")
+  chessGamesAsWhite   ChessGame[]    @relation("chess_white_games")
+  chessGamesAsBlack   ChessGame[]    @relation("chess_black_games")
+  chessPlayer         ChessPlayer?
+
   @@index([organizationId, departmentId])
   @@index([email])
   @@map("users")
@@ -421,4 +428,80 @@ model MicrosoftToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("microsoft_tokens")
+}
+
+// ── Chess ─────────────────────────────────────────────────────────────────────
+
+enum ChessRoomStatus {
+  WAITING
+  ACTIVE
+  FINISHED
+}
+
+enum ChessResult {
+  WHITE_WIN
+  BLACK_WIN
+  DRAW
+}
+
+enum ChessEndReason {
+  CHECKMATE
+  STALEMATE
+  TIMEOUT
+  RESIGN
+  DRAW_AGREEMENT
+  DISCONNECT
+  INSUFFICIENT_MATERIAL
+  THREEFOLD_REPETITION
+  FIFTY_MOVE_RULE
+}
+
+model ChessRoom {
+  id          String          @id @default(uuid())
+  name        String          @db.VarChar(255)
+  creatorId   String
+  creator     User            @relation("chess_room_creator", fields: [creatorId], references: [id])
+  status      ChessRoomStatus @default(WAITING)
+  timeControl Int?
+  whiteId     String?
+  blackId     String?
+  white       User?           @relation("chess_white", fields: [whiteId], references: [id])
+  black       User?           @relation("chess_black", fields: [blackId], references: [id])
+  game        ChessGame?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@map("chess_rooms")
+}
+
+model ChessGame {
+  id             String         @id @default(uuid())
+  roomId         String         @unique
+  room           ChessRoom      @relation(fields: [roomId], references: [id])
+  whiteId        String
+  blackId        String
+  white          User           @relation("chess_white_games", fields: [whiteId], references: [id])
+  black          User           @relation("chess_black_games", fields: [blackId], references: [id])
+  result         ChessResult
+  endReason      ChessEndReason
+  whiteEloChange Int
+  blackEloChange Int
+  createdAt      DateTime       @default(now())
+
+  @@map("chess_games")
+}
+
+model ChessPlayer {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  elo         Int      @default(1200)
+  wins        Int      @default(0)
+  losses      Int      @default(0)
+  draws       Int      @default(0)
+  gamesPlayed Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("chess_players")
 }
