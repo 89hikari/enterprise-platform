@@ -8,11 +8,18 @@ import type { ChatMessage, ChatRoom } from '@enterprise/shared';
 export function useChatSocket(token: string | undefined) {
   const qc = useQueryClient();
   const socketRef = useRef<ReturnType<typeof getChatSocket> | null>(null);
+  const connectedRef = useRef(false);
 
   useEffect(() => {
     if (!token) return;
     const socket = getChatSocket(token);
     socketRef.current = socket;
+
+    const onConnect = () => { connectedRef.current = true; };
+    const onDisconnect = () => { connectedRef.current = false; };
+
+    socket.on('connect', onConnect);
+    socket.on('disconnect', onDisconnect);
 
     socket.on('message_received', (message: ChatMessage) => {
       // Append to the room's message list
@@ -33,6 +40,8 @@ export function useChatSocket(token: string | undefined) {
     });
 
     return () => {
+      socket.off('connect', onConnect);
+      socket.off('disconnect', onDisconnect);
       socket.off('message_received');
       socket.off('message_deleted');
     };
@@ -61,7 +70,9 @@ export function useChatSocket(token: string | undefined) {
   }, []);
 
   const markRead = useCallback((roomId: string) => {
-    socketRef.current?.emit('mark_read', { roomId });
+    if (connectedRef.current) {
+      socketRef.current?.emit('mark_read', { roomId });
+    }
   }, []);
 
   return { joinRoom, leaveRoom, sendMessage, sendTyping, markRead };

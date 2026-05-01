@@ -67,6 +67,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: AuthSocket,
     @MessageBody() payload: { roomId: string },
   ) {
+    if (!client.user) throw new WsException('Not authenticated');
     try {
       await this.chat.getRoom(payload.roomId, client.user.sub);
       await client.join(payload.roomId);
@@ -92,6 +93,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: AuthSocket,
     @MessageBody() payload: { roomId: string } & SendMessageDto,
   ) {
+    if (!client.user) throw new WsException('Not authenticated');
     try {
       const { roomId, ...dto } = payload;
       const message = await this.chat.saveMessage(roomId, client.user.sub, dto);
@@ -108,6 +110,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: AuthSocket,
     @MessageBody() payload: { messageId: string; roomId: string },
   ) {
+    if (!client.user) throw new WsException('Not authenticated');
     const result = await this.chat.deleteMessage(payload.messageId, client.user.sub);
     this.server.to(payload.roomId).emit('message_deleted', { messageId: payload.messageId });
     return result;
@@ -120,6 +123,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: AuthSocket,
     @MessageBody() payload: { roomId: string },
   ) {
+    if (!client.user) throw new WsException('Not authenticated');
     client.to(payload.roomId).emit('user_typing', {
       roomId: payload.roomId,
       userId: client.user.sub,
@@ -131,6 +135,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: AuthSocket,
     @MessageBody() payload: { roomId: string },
   ) {
+    if (!client.user) throw new WsException('Not authenticated');
     client.to(payload.roomId).emit('user_stopped_typing', {
       roomId: payload.roomId,
       userId: client.user.sub,
@@ -144,6 +149,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: AuthSocket,
     @MessageBody() payload: { roomId: string },
   ) {
+    if (!client.user) throw new WsException('Not authenticated');
     await this.chat.markRead(payload.roomId, client.user.sub);
     client.to(payload.roomId).emit('room_read', {
       roomId: payload.roomId,
