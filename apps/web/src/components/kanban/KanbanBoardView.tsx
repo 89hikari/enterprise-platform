@@ -45,7 +45,7 @@ function CardItem({ card, onClick }: { card: KanbanCard; onClick: () => void }) 
       {...listeners}
       onClick={onClick}
       className={clsx(
-        'bg-white border border-gray-200 rounded-lg p-3 cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all select-none',
+        'terminal-card border border-gray-200 rounded-lg p-3 cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all select-none',
         isDragging && 'opacity-40',
       )}
     >
@@ -94,7 +94,7 @@ function DroppableArea({ id, children }: { id: string; children: React.ReactNode
 function ColumnHeader({ column, onAddCard }: { column: KanbanColumn; onAddCard: () => void }) {
   return (
     <div
-      className="flex items-center justify-between mb-2 px-1"
+      className="flex items-center justify-between mb-2 px-1 terminal-card"
       style={{ borderTop: `3px solid ${column.color ?? '#94a3b8'}` }}
     >
       <span className="font-semibold text-gray-700 text-sm pt-1">{column.name}</span>
@@ -185,10 +185,10 @@ export function KanbanBoardView({ board, token }: Props) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Board header */}
-      <div className="px-6 py-3 border-b border-gray-200 bg-white shrink-0">
-        <h1 className="text-xl font-bold text-gray-900">{board.name}</h1>
-      </div>
+        {/* Board header */}
+        <div className="px-6 py-3 border-b" style={{ borderColor: 'var(--border)', background: 'var(--bg-elevated)' }}>
+          <h1 className="text-xl font-bold terminal-heading terminal-cursor">{board.name}</h1>
+        </div>
 
       {/* Columns */}
       <div className="flex-1 overflow-x-auto p-4">
@@ -200,7 +200,7 @@ export function KanbanBoardView({ board, token }: Props) {
         >
           <div className="flex gap-4 h-full items-start">
             {board.columns.map((col) => (
-              <div key={col.id} className="w-72 shrink-0 bg-gray-100 rounded-xl p-3 flex flex-col max-h-full">
+              <div key={col.id} className="w-72 shrink-0 terminal-card p-3 flex flex-col max-h-full">
                 <ColumnHeader
                   column={col}
                   onAddCard={() => setAddingToColumn(col.id)}
@@ -221,32 +221,32 @@ export function KanbanBoardView({ board, token }: Props) {
                 {/* Quick-add card */}
                 {addingToColumn === col.id ? (
                   <div className="mt-2">
-                    <textarea
-                      autoFocus
-                      value={newCardTitle}
-                      onChange={(e) => setNewCardTitle(e.target.value)}
-                      placeholder="Card title..."
-                      rows={2}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          if (newCardTitle.trim()) createCard.mutate({ columnId: col.id, title: newCardTitle.trim() });
-                        }
-                        if (e.key === 'Escape') setAddingToColumn(null);
-                      }}
-                    />
+              <textarea
+                autoFocus
+                value={newCardTitle}
+                onChange={(e) => setNewCardTitle(e.target.value)}
+                placeholder="Card title..."
+                rows={2}
+                className="w-full terminal-input resize-none"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    if (newCardTitle.trim()) createCard.mutate({ columnId: col.id, title: newCardTitle.trim() });
+                  }
+                  if (e.key === 'Escape') setAddingToColumn(null);
+                }}
+              />
                     <div className="flex gap-2 mt-1.5">
                       <button
                         onClick={() => { if (newCardTitle.trim()) createCard.mutate({ columnId: col.id, title: newCardTitle.trim() }); }}
                         disabled={!newCardTitle.trim() || createCard.isPending}
-                        className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                        className="terminal-btn terminal-btn-primary text-xs px-3 py-1.5"
                       >
                         Add
                       </button>
                       <button
                         onClick={() => setAddingToColumn(null)}
-                        className="text-xs text-gray-500 hover:text-gray-700"
+                        className="terminal-btn text-xs px-3 py-1.5"
                       >
                         Cancel
                       </button>
@@ -264,13 +264,13 @@ export function KanbanBoardView({ board, token }: Props) {
             ))}
           </div>
 
-          <DragOverlay>
-            {activeCard && (
-              <div className="bg-white border-2 border-blue-400 rounded-lg p-3 shadow-lg w-72 opacity-90">
-                <p className="text-sm font-medium text-gray-900">{activeCard.title}</p>
-              </div>
-            )}
-          </DragOverlay>
+           <DragOverlay>
+             {activeCard && (
+               <div className="terminal-card border-2 border-blue-400 p-3 w-72 opacity-90">
+                 <p className="text-sm font-medium text-gray-900">{activeCard.title}</p>
+               </div>
+             )}
+           </DragOverlay>
         </DndContext>
       </div>
 

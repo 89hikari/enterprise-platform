@@ -32,7 +32,7 @@ export default function KanbanListPage() {
   });
 
   return (
-    <div className="p-6">
+    <div className="p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="terminal-heading terminal-cursor">kanban</h1>
         <button
@@ -79,7 +79,7 @@ export default function KanbanListPage() {
           <Link
             key={board.id}
             href={`/kanban/${board.id}`}
-            className="p-5 transition-colors"
+            className="p-5 transition-colors terminal-card"
             style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}
           >
             <h3 className="font-semibold text-sm mb-1">▤ {board.name}</h3>

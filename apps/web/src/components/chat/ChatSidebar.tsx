@@ -5,7 +5,9 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from 'react-oidc-context';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api-client';
+import { NewChatModal } from './NewChatModal';
 import type { ChatRoom } from '@enterprise/shared';
+import { useState } from 'react';
 
 interface Props {
   rooms: ChatRoom[];
@@ -26,6 +28,7 @@ export function ChatSidebar({ rooms, isLoading }: Props) {
   const auth = useAuth();
   const token = auth.user?.access_token;
   const qc = useQueryClient();
+  const [showNewChat, setShowNewChat] = useState(false);
 
   const createDirect = useMutation({
     mutationFn: (userId: string) =>
@@ -37,13 +40,13 @@ export function ChatSidebar({ rooms, isLoading }: Props) {
     <div className="w-64 flex flex-col h-full shrink-0 border-r" style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border)' }}>
       <div className="p-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
         <span className="font-semibold text-sm" style={{ color: 'var(--text)' }}>messages</span>
-        <Link
-          href="/users"
-          title="New chat"
-          className="text-lg leading-none terminal-link"
+        <button
+          onClick={() => setShowNewChat(true)}
+          title="New message"
+          className="text-lg leading-none terminal-link cursor-pointer bg-transparent border-0 p-0"
         >
           +
-        </Link>
+        </button>
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -102,6 +105,17 @@ export function ChatSidebar({ rooms, isLoading }: Props) {
           );
         })}
       </div>
+
+      {showNewChat && (
+        <NewChatModal
+          token={token}
+          onClose={() => setShowNewChat(false)}
+          onCreated={() => {
+            setShowNewChat(false);
+            qc.invalidateQueries({ queryKey: ['rooms'] });
+          }}
+        />
+      )}
     </div>
   );
 }

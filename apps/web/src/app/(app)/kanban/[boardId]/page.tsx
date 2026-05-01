@@ -17,8 +17,8 @@ export default function KanbanBoardPage({ params }: { params: Promise<{ boardId:
     enabled: !!token && !!boardId,
   });
 
-  if (isLoading) return <div className="p-6 text-gray-400">Loading board...</div>;
-  if (!board) return <div className="p-6 text-gray-400">Board not found.</div>;
+  if (isLoading) return <div className="p-6 text-sm" style={{ color: 'var(--text-muted)' }}>Loading board...</div>;
+  if (!board) return <div className="p-6 text-sm" style={{ color: 'var(--text-muted)' }}>Board not found.</div>;
 
   return <KanbanBoardView board={board} token={token} />;
 }

@@ -56,8 +56,8 @@ export default function ChatRoomPage({ params }: { params: Promise<{ roomId: str
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-gray-200 bg-white shrink-0">
-        <p className="font-semibold text-gray-900">{room?.name ?? '...'}</p>
+      <div className="px-4 py-3 border-b shrink-0" style={{ borderColor: 'var(--border)', background: 'var(--bg-elevated)' }}>
+        <p className="font-semibold text-gray-900 terminal-heading">{room?.name ?? '...'}</p>
         {room?.members && (
           <p className="text-xs text-gray-400">{room.members.length} members</p>
         )}

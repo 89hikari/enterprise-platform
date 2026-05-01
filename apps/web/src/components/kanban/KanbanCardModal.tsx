@@ -112,15 +112,15 @@ export function KanbanCardModal({ card, boardId, boardMembers, boardColumns, tok
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 pt-16 px-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
+      <div className="terminal-card w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-100 flex items-start gap-3">
+        <div className="px-6 py-4 border-b" style={{ borderColor: 'var(--border)' }}>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onBlur={handleSaveTitle}
             onKeyDown={(e) => { if (e.key === 'Enter') { e.currentTarget.blur(); } }}
-            className="flex-1 text-lg font-semibold text-gray-900 border-0 outline-none focus:ring-2 focus:ring-blue-400 rounded px-1 -mx-1"
+            className="flex-1 text-lg font-semibold terminal-text border-0 outline-none focus:ring-2 focus:ring-blue-400 rounded px-1 -mx-1"
           />
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none shrink-0">×</button>
         </div>
@@ -143,20 +143,20 @@ export function KanbanCardModal({ card, boardId, boardMembers, boardColumns, tok
 
           {/* Due date */}
           <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-500 w-24 shrink-0">Due date</span>
+            <span className="text-sm terminal-text-muted w-24 shrink-0">Due date</span>
             <input
               type="date"
               value={dueDate}
               onChange={(e) => handleDueDateChange(e.target.value)}
               className={clsx(
-                'text-sm border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400',
+                'terminal-input text-sm',
                 dueDate && new Date(dueDate) < new Date() ? 'text-red-500' : 'text-gray-700',
               )}
             />
             {dueDate && (
               <button
                 onClick={() => handleDueDateChange('')}
-                className="text-xs text-gray-400 hover:text-red-500"
+                className="terminal-link text-xs"
               >
                 Clear
               </button>
@@ -166,12 +166,12 @@ export function KanbanCardModal({ card, boardId, boardMembers, boardColumns, tok
           {/* Move to column */}
           {boardColumns.length > 1 && (
             <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-500 w-24 shrink-0">Move to</span>
+              <span className="text-sm terminal-text-muted w-24 shrink-0">Move to</span>
               <select
                 defaultValue=""
                 onChange={(e) => { if (e.target.value) moveCard.mutate(e.target.value); }}
                 disabled={moveCard.isPending}
-                className="text-sm border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700 bg-white"
+                className="terminal-input text-sm bg-white"
               >
                 <option value="" disabled>Select column…</option>
                 {boardColumns
@@ -185,11 +185,11 @@ export function KanbanCardModal({ card, boardId, boardMembers, boardColumns, tok
 
           {/* Assignees */}
           <div className="flex items-start gap-3">
-            <span className="text-sm text-gray-500 w-24 shrink-0 pt-1">Assignees</span>
+            <span className="text-sm terminal-text-muted w-24 shrink-0 pt-1">Assignees</span>
             <div className="flex-1">
               <div className="flex flex-wrap gap-2 mb-1">
                 {assignees.length === 0 && !pickerOpen && (
-                  <span className="text-sm text-gray-400">None</span>
+                  <span className="text-sm terminal-text-muted">None</span>
                 )}
                 {assignees.map(({ user: u }) => (
                   <div key={u.id} className="flex items-center gap-1.5 bg-blue-50 border border-blue-200 rounded-full pl-1.5 pr-1 py-0.5">
@@ -215,14 +215,14 @@ export function KanbanCardModal({ card, boardId, boardMembers, boardColumns, tok
               <div className="relative" ref={pickerRef}>
                 <button
                   onClick={() => setPickerOpen((o) => !o)}
-                  className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                  className="terminal-link text-xs"
                 >
                   + Assign
                 </button>
                 {pickerOpen && (
-                  <div className="absolute left-0 top-6 z-10 bg-white border border-gray-200 rounded-xl shadow-lg w-56 py-1 max-h-52 overflow-y-auto">
+                  <div className="absolute left-0 top-6 z-10 terminal-card w-56 py-1 max-h-52 overflow-y-auto">
                     {boardMembers.length === 0 && (
-                      <p className="px-3 py-2 text-xs text-gray-400">No board members</p>
+                      <p className="px-3 py-2 text-xs terminal-text-muted">No board members</p>
                     )}
                     {boardMembers.map(({ user: m }) => {
                       const isAssigned = assignees.some((a) => a.user.id === m.id);
@@ -255,24 +255,24 @@ export function KanbanCardModal({ card, boardId, boardMembers, boardColumns, tok
 
           {/* Description */}
           <div>
-            <p className="text-sm font-medium text-gray-700 mb-1.5">Description</p>
+            <p className="text-sm font-medium terminal-text mb-1.5">Description</p>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               onBlur={handleSaveDescription}
               placeholder="Add a description…"
               rows={4}
-              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800 placeholder:text-gray-400"
+              className="terminal-input w-full resize-none"
             />
           </div>
 
           {/* Subtasks */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium text-gray-700">
+              <p className="text-sm font-medium terminal-text">
                 Subtasks
                 {subtasks.length > 0 && (
-                  <span className="ml-2 text-xs text-gray-400">{completed}/{subtasks.length}</span>
+                  <span className="ml-2 text-xs terminal-text-muted">{completed}/{subtasks.length}</span>
                 )}
               </p>
               {subtasks.length > 0 && (
@@ -294,7 +294,7 @@ export function KanbanCardModal({ card, boardId, boardMembers, boardColumns, tok
                     onChange={(e) => toggleSubtask.mutate({ id: st.id, isCompleted: e.target.checked })}
                     className="w-4 h-4 rounded accent-blue-600 cursor-pointer"
                   />
-                  <span className={clsx('text-sm flex-1', st.isCompleted && 'line-through text-gray-400')}>
+                  <span className={clsx('text-sm flex-1', st.isCompleted && 'line-through terminal-text-muted')}>
                     {st.title}
                   </span>
                   <button
@@ -313,7 +313,7 @@ export function KanbanCardModal({ card, boardId, boardMembers, boardColumns, tok
                 value={newSubtaskTitle}
                 onChange={(e) => setNewSubtaskTitle(e.target.value)}
                 placeholder="Add subtask…"
-                className="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="flex-1 terminal-input"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleAddSubtask();
                   if (e.key === 'Escape') setNewSubtaskTitle('');
@@ -322,7 +322,7 @@ export function KanbanCardModal({ card, boardId, boardMembers, boardColumns, tok
               <button
                 onClick={handleAddSubtask}
                 disabled={!newSubtaskTitle.trim()}
-                className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 disabled:opacity-40"
+                className="terminal-btn terminal-btn-primary text-xs px-3 py-1.5"
               >
                 Add
               </button>
@@ -332,7 +332,7 @@ export function KanbanCardModal({ card, boardId, boardMembers, boardColumns, tok
           {/* Attachments */}
           {(fullCard?.attachments?.length ?? 0) > 0 && (
             <div>
-              <p className="text-sm font-medium text-gray-700 mb-2">Attachments</p>
+              <p className="text-sm font-medium terminal-text mb-2">Attachments</p>
               <div className="space-y-1.5">
                 {fullCard!.attachments!.map((att) => (
                   <a
@@ -340,11 +340,11 @@ export function KanbanCardModal({ card, boardId, boardMembers, boardColumns, tok
                     href={att.fileUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
+                    className="flex items-center gap-2 text-sm terminal-link"
                   >
                     <span>📎</span>
                     <span className="truncate">{att.fileName}</span>
-                    <span className="text-xs text-gray-400 shrink-0">
+                    <span className="text-xs shrink-0" style={{ color: 'var(--text-muted)' }}>
                       {(att.fileSize / 1024).toFixed(0)} KB
                     </span>
                   </a>
@@ -355,13 +355,13 @@ export function KanbanCardModal({ card, boardId, boardMembers, boardColumns, tok
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-gray-100 flex justify-between items-center bg-gray-50">
-          <p className="text-xs text-gray-400">
+        <div className="px-6 py-3 border-t flex justify-between items-center" style={{ borderColor: 'var(--border)', background: 'var(--bg-surface)' }}>
+          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
             Created {new Date(card.createdAt).toLocaleDateString()}
           </p>
           <button
             onClick={onClose}
-            className="text-sm bg-blue-600 text-white px-4 py-1.5 rounded-lg hover:bg-blue-700"
+            className="terminal-btn terminal-btn-primary text-sm px-4 py-1.5"
           >
             Done
           </button>
